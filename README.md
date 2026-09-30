@@ -22,6 +22,7 @@ only ever changes that slot — nothing else on the sheet reflows or shifts.
 - `Ctrl+Z` / `Ctrl+Y` undo/redo.
 - Use **Play** to hear the tab with a plucked-string guitar sound; each note slot is one beat and the tempo is adjustable in BPM.
 - Use the **Starter** menu for a blank tab or an original picking-pattern practice exercise.
+- Use **Clear Saved Work** to remove the browser's autosaved tab and return to a fresh sheet.
 - Toolbar: add/remove note slots, barlines, and strings; switch tuning presets
   (or click a string label to rename it); save/load a project as JSON;
   export a plain-text `.txt` tab; print the sheet.

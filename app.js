@@ -590,6 +590,15 @@ document.getElementById('btnNew').addEventListener('click', () => {
     render(); autosave();
   }
 });
+document.getElementById('btnClearSaved').addEventListener('click', () => {
+  if (!confirm('Clear the tab saved in this browser and start fresh?')) return;
+  try { localStorage.removeItem(AUTOSAVE_KEY); } catch (e) { /* storage unavailable */ }
+  state = defaultState();
+  selection = null;
+  undoStack = [];
+  redoStack = [];
+  render();
+});
 document.getElementById('btnSaveJson').addEventListener('click', exportProjectFile);
 document.getElementById('btnLoadJson').addEventListener('click', () => document.getElementById('fileInput').click());
 document.getElementById('fileInput').addEventListener('change', (e) => {
