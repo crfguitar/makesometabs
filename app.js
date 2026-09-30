@@ -208,6 +208,11 @@ function deleteSelected() {
   render(); autosave();
 }
 
+function deleteSelectedBarline() {
+  if (!selection || state.items[selection.itemIndex].type !== 'bar') return;
+  deleteSelected();
+}
+
 /* ---------- strings / tuning ---------- */
 
 function addString() {
@@ -420,6 +425,7 @@ document.getElementById('songTitle').addEventListener('input', (e) => {
 document.getElementById('tuningPreset').addEventListener('change', (e) => applyTuningPreset(e.target.value));
 document.getElementById('btnAddNote').addEventListener('click', insertNoteAfterSelection);
 document.getElementById('btnAddBar').addEventListener('click', insertBarAfterSelection);
+document.getElementById('btnDeleteBar').addEventListener('click', deleteSelectedBarline);
 document.getElementById('btnDeleteCol').addEventListener('click', deleteSelected);
 document.getElementById('btnAddString').addEventListener('click', addString);
 document.getElementById('btnRemoveString').addEventListener('click', removeString);
@@ -457,8 +463,10 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
 document.getElementById('btnExportTxt').addEventListener('click', exportTxtFile);
 document.getElementById('btnPrint').addEventListener('click', () => window.print());
 
-document.getElementById('tabSheet').addEventListener('keydown', (e) => {
-  if (document.activeElement && document.activeElement.isContentEditable) return;
+document.addEventListener('keydown', (e) => {
+  const target = e.target;
+  if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLSelectElement || target.isContentEditable) return;
   const k = e.key;
   if (k >= '0' && k <= '9') { e.preventDefault(); handleDigit(k); return; }
   if (k === 'x' || k === 'X') { e.preventDefault(); setMuteCurrent(); return; }
