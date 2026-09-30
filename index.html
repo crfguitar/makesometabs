@@ -58,6 +58,9 @@
     src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
     data-name="BMC-Widget"
     data-slug="crfguitar"
+    data-position="right"
+    data-x_margin="20"
+    data-y_margin="16"
     data-color="#FFDD00"
     data-emoji=""
     data-font="Cookie"
@@ -65,5 +68,22 @@
     data-outline-color="#000000"
     data-font-color="#000000"
     data-coffee-color="#ffffff"></script>
+  <script>
+    const routeCoffeeButton = () => {
+      const coffeeButton = document.getElementById('bmc-wbtn');
+      if (!coffeeButton || coffeeButton.dataset.directLink) return Boolean(coffeeButton);
+      coffeeButton.dataset.directLink = 'true';
+      coffeeButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        window.location.href = 'https://buymeacoffee.com/crfguitar';
+      }, true);
+      return true;
+    };
+    if (!routeCoffeeButton()) {
+      const widgetObserver = new MutationObserver(routeCoffeeButton);
+      widgetObserver.observe(document.body, { childList: true });
+    }
+  </script>
 </body>
 </html>
