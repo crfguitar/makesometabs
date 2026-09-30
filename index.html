@@ -50,6 +50,14 @@
       <input id="fileInput" type="file" accept="application/json" style="display:none">
       <button id="btnExportTxt">Export .txt</button>
       <button id="btnPrint">Print</button>
+      <span class="sep"></span>
+      <button id="btnPlay" title="Play tab">Play</button>
+      <button id="btnStop" title="Stop playback" disabled>Stop</button>
+      <label class="tempo-control" for="tempoInput">Tempo
+        <input id="tempoInput" type="number" min="40" max="220" value="96" inputmode="numeric">
+        <span>BPM</span>
+      </label>
+      <span id="playbackStatus" class="playback-status" aria-live="polite">Ready</span>
     </div>
   </header>
 

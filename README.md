@@ -20,6 +20,7 @@ only ever changes that slot — nothing else on the sheet reflows or shifts.
 - Arrow keys move around. `Enter`/`Tab` moves to the next note slot, creating
   one if you're at the end. `|` inserts a barline after the selected slot.
 - `Ctrl+Z` / `Ctrl+Y` undo/redo.
+- Use **Play** to hear the tab with a plucked-string guitar sound; each note slot is one beat and the tempo is adjustable in BPM.
 - Use the **Starter** menu for a blank tab or an original picking-pattern practice exercise.
 - Toolbar: add/remove note slots, barlines, and strings; switch tuning presets
   (or click a string label to rename it); save/load a project as JSON;

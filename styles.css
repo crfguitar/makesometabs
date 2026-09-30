@@ -81,6 +81,22 @@ button {
 button:hover { background: var(--accent-soft); border-color: var(--accent); }
 button:active { transform: translateY(1px); }
 .sep { width: 1px; align-self: stretch; background: #e0dace; margin: 0 4px; }
+.tempo-control {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.tempo-control input {
+  width: 58px;
+  padding: 5px 6px;
+  border: 1px solid #d8d0c0;
+  border-radius: 4px;
+  color: var(--ink);
+  background: #fff;
+}
+.playback-status { font-size: 12px; color: var(--muted); }
 
 /* ---------- Tab sheet ---------- */
 .tab-sheet {
@@ -155,6 +171,10 @@ button:active { transform: translateY(1px); }
   outline-offset: -2px;
   border-radius: 3px;
 }
+.cell.playing, .barline.playing::before {
+  background: #e8b84a;
+}
+.cell.playing { color: #2a2620; }
 
 .barline {
   position: relative;

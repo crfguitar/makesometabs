@@ -79,6 +79,10 @@ let undoStack = [];
 let redoStack = [];
 let typedBuffer = '';
 let lastEditKey = null;
+let audioContext = null;
+let playbackTimers = [];
+let playbackItemIndex = null;
+let isPlaying = false;
 
 function pushHistory() {
   undoStack.push(JSON.stringify(state));
@@ -98,6 +102,120 @@ function redo() {
   state = JSON.parse(redoStack.pop());
   selection = null;
   render(); autosave();
+}
+
+const OPEN_STRING_FREQUENCIES = {
+  standard: [329.63, 246.94, 196.00, 146.83, 110.00, 82.41],
+  dropD: [329.63, 246.94, 196.00, 146.83, 110.00, 73.42],
+  halfDown: [311.13, 233.08, 185.00, 138.59, 103.83, 77.78],
+  dadgad: [293.66, 220.00, 196.00, 146.83, 110.00, 73.42],
+  bass4: [98.00, 73.42, 55.00, 41.20],
+};
+
+function getAudioContext() {
+  if (!audioContext) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+    audioContext = new AudioContextClass();
+  }
+  return audioContext;
+}
+
+function pluckString(frequency, startTime, velocity, duration) {
+  const context = getAudioContext();
+  if (!context) return;
+  const sampleRate = context.sampleRate;
+  const length = Math.floor(sampleRate * duration);
+  const delayLength = Math.max(2, Math.round(sampleRate / frequency));
+  const buffer = context.createBuffer(1, length, sampleRate);
+  const samples = buffer.getChannelData(0);
+  const delayLine = new Float32Array(delayLength);
+
+  for (let i = 0; i < delayLength; i++) delayLine[i] = Math.random() * 2 - 1;
+  for (let i = 0; i < length; i++) {
+    const position = i % delayLength;
+    const current = delayLine[position];
+    const next = delayLine[(position + 1) % delayLength];
+    samples[i] = current;
+    delayLine[position] = (current + next) * 0.5 * 0.996;
+  }
+
+  const source = context.createBufferSource();
+  const filter = context.createBiquadFilter();
+  const gain = context.createGain();
+  source.buffer = buffer;
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(Math.min(7200, frequency * 9), startTime);
+  filter.Q.setValueAtTime(0.7, startTime);
+  gain.gain.setValueAtTime(0.0001, startTime);
+  gain.gain.exponentialRampToValueAtTime(velocity, startTime + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  source.connect(filter).connect(gain).connect(context.destination);
+  source.start(startTime);
+  source.stop(startTime + duration + 0.05);
+}
+
+function stopPlayback() {
+  playbackTimers.forEach(timer => clearTimeout(timer));
+  playbackTimers = [];
+  playbackItemIndex = null;
+  isPlaying = false;
+  document.getElementById('btnPlay').disabled = false;
+  document.getElementById('btnStop').disabled = true;
+  document.getElementById('playbackStatus').textContent = 'Ready';
+  render();
+}
+
+function playTab() {
+  const context = getAudioContext();
+  if (!context) {
+    document.getElementById('playbackStatus').textContent = 'Audio unavailable';
+    return;
+  }
+  if (isPlaying) stopPlayback();
+  context.resume();
+
+  const tempo = Math.max(40, Math.min(220, Number(document.getElementById('tempoInput').value) || 96));
+  document.getElementById('tempoInput').value = tempo;
+  const beatDuration = 60 / tempo;
+  const startTime = context.currentTime + 0.08;
+  let noteTime = startTime;
+  let playableCount = 0;
+  const openFrequencies = OPEN_STRING_FREQUENCIES[state.tuningPreset] || OPEN_STRING_FREQUENCIES.standard;
+
+  state.items.forEach((item, itemIndex) => {
+    if (item.type !== 'note') return;
+    const frets = item.frets || [];
+    const activeFrets = frets
+      .map((fret, stringIndex) => ({ fret, stringIndex }))
+      .filter(({ fret }) => fret !== null && fret !== undefined && fret !== 'x');
+    if (activeFrets.length) {
+      activeFrets.forEach(({ fret, stringIndex }) => {
+        const openFrequency = openFrequencies[stringIndex] || OPEN_STRING_FREQUENCIES.standard[stringIndex] || 82.41;
+        const frequency = openFrequency * Math.pow(2, Number(fret) / 12);
+        pluckString(frequency, noteTime + stringIndex * 0.008, 0.16, Math.min(2.8, beatDuration * 2.4));
+      });
+      playableCount++;
+    }
+    const highlightDelay = Math.max(0, (noteTime - context.currentTime) * 1000);
+    playbackTimers.push(setTimeout(() => {
+      if (!isPlaying) return;
+      playbackItemIndex = itemIndex;
+      render();
+    }, highlightDelay));
+    noteTime += beatDuration;
+  });
+
+  if (!playableCount) {
+    document.getElementById('playbackStatus').textContent = 'Add notes to play';
+    return;
+  }
+  isPlaying = true;
+  document.getElementById('btnPlay').disabled = true;
+  document.getElementById('btnStop').disabled = false;
+  document.getElementById('playbackStatus').textContent = 'Playing';
+  const finishDelay = Math.max(0, (noteTime - context.currentTime) * 1000 + 200);
+  playbackTimers.push(setTimeout(stopPlayback, finishDelay));
 }
 
 /* ---------- selection / navigation ---------- */
@@ -359,7 +477,8 @@ function render() {
     line.forEach(({ item, index }, colPos) => {
       if (item.type === 'bar') {
         const bEl = document.createElement('div');
-        bEl.className = 'barline' + (isSelected(index) ? ' selected' : '');
+        bEl.className = 'barline' + (isSelected(index) ? ' selected' : '') +
+          (playbackItemIndex === index ? ' playing' : '');
         bEl.style.gridColumn = String(colPos + 1);
         bEl.style.gridRow = `1 / span ${numStrings}`;
         bEl.dataset.itemIndex = String(index);
@@ -373,6 +492,7 @@ function render() {
           if (val !== null && val !== undefined) cls += ' has-value';
           if (val === 'x') cls += ' mute';
           if (isSelected(index, s)) cls += ' selected';
+          if (playbackItemIndex === index) cls += ' playing';
           cEl.className = cls;
           cEl.style.gridColumn = String(colPos + 1);
           cEl.style.gridRow = String(s + 1);
@@ -493,6 +613,9 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
 });
 document.getElementById('btnExportTxt').addEventListener('click', exportTxtFile);
 document.getElementById('btnPrint').addEventListener('click', () => window.print());
+document.getElementById('btnPlay').addEventListener('click', playTab);
+document.getElementById('btnStop').addEventListener('click', stopPlayback);
+window.addEventListener('pagehide', stopPlayback);
 
 document.addEventListener('keydown', (e) => {
   const target = e.target;
