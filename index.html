@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Make Some Tabs — a free, seamless grid-based guitar tab editor. Write notes and chords without anything shifting around.">
+<title>Make Some Tabs — Guitar Tab Editor</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="toolbar">
+    <div class="toolbar-row">
+      <span class="brand">Make Some Tabs</span>
+      <input id="songTitle" class="title-input" type="text" value="Untitled Tab" spellcheck="false">
+      <div class="tuning-picker">
+        <label for="tuningPreset">Tuning</label>
+        <select id="tuningPreset">
+          <option value="standard">Standard (E A D G B e)</option>
+          <option value="dropD">Drop D (D A D G B e)</option>
+          <option value="halfDown">Half-step down</option>
+          <option value="dadgad">DADGAD</option>
+          <option value="bass4">Bass (E A D G)</option>
+          <option value="custom">Custom…</option>
+        </select>
+      </div>
+    </div>
+    <div class="toolbar-row">
+      <button id="btnAddNote" title="Add a note slot (Enter)">+ Note</button>
+      <button id="btnAddBar" title="Add measure line (|)">+ Barline</button>
+      <button id="btnDeleteCol" title="Delete selected slot (Delete)">Delete Slot</button>
+      <span class="sep"></span>
+      <button id="btnAddString" title="Add a string">+ String</button>
+      <button id="btnRemoveString" title="Remove bottom string">- String</button>
+      <span class="sep"></span>
+      <button id="btnUndo" title="Undo (Ctrl+Z)">Undo</button>
+      <button id="btnRedo" title="Redo (Ctrl+Y)">Redo</button>
+      <span class="sep"></span>
+      <button id="btnNew">New</button>
+      <button id="btnSaveJson">Save Project</button>
+      <button id="btnLoadJson">Load Project</button>
+      <input id="fileInput" type="file" accept="application/json" style="display:none">
+      <button id="btnExportTxt">Export .txt</button>
+      <button id="btnPrint">Print</button>
+    </div>
+  </header>
+
+  <main id="tabSheet" class="tab-sheet" tabindex="0">
+    <!-- rendered tab lines go here -->
+  </main>
+
+  <footer class="hint-bar">
+    <span>Click a cell to select it, then type a fret number (0–24), <kbd>x</kbd> for a mute, or <kbd>Backspace</kbd> to clear.</span>
+    <span>Arrows move around. <kbd>Enter</kbd>/<kbd>Tab</kbd> adds &amp; moves to the next note slot. <kbd>|</kbd> inserts a barline.</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
