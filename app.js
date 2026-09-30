@@ -39,6 +39,29 @@ function defaultState() {
   };
 }
 
+function practiceNote(stringIndex, fret) {
+  const item = newNoteItem(6);
+  item.frets[stringIndex] = fret;
+  return item;
+}
+
+function pickingPracticeState() {
+  return {
+    title: 'Picking Pattern Practice',
+    tuningPreset: 'standard',
+    strings: TUNING_PRESETS.standard.slice(),
+    columnsPerLine: 16,
+    items: [
+      newBarItem(),
+      practiceNote(4, 3), practiceNote(1, 0), practiceNote(3, 2), practiceNote(0, 0),
+      practiceNote(4, 3), practiceNote(2, 0), practiceNote(3, 2), practiceNote(1, 1),
+      practiceNote(4, 3), practiceNote(1, 0), practiceNote(3, 2), practiceNote(0, 0),
+      practiceNote(4, 3), practiceNote(2, 0), practiceNote(3, 2), practiceNote(1, 1),
+      newBarItem(),
+    ],
+  };
+}
+
 const AUTOSAVE_KEY = 'tabit_autosave_v1';
 function autosave() {
   try { localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ }
@@ -423,6 +446,14 @@ document.getElementById('songTitle').addEventListener('input', (e) => {
   autosave();
 });
 document.getElementById('tuningPreset').addEventListener('change', (e) => applyTuningPreset(e.target.value));
+document.getElementById('starterPreset').addEventListener('change', (e) => {
+  if (!e.target.value) return;
+  pushHistory();
+  state = e.target.value === 'pickingPractice' ? pickingPracticeState() : defaultState();
+  selection = null;
+  e.target.value = '';
+  render(); autosave();
+});
 document.getElementById('btnAddNote').addEventListener('click', insertNoteAfterSelection);
 document.getElementById('btnAddBar').addEventListener('click', insertBarAfterSelection);
 document.getElementById('btnDeleteBar').addEventListener('click', deleteSelectedBarline);
@@ -466,7 +497,7 @@ document.getElementById('btnPrint').addEventListener('click', () => window.print
 document.addEventListener('keydown', (e) => {
   const target = e.target;
   if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement ||
-      target instanceof HTMLSelectElement || target.isContentEditable) return;
+      target.isContentEditable) return;
   const k = e.key;
   if (k >= '0' && k <= '9') { e.preventDefault(); handleDigit(k); return; }
   if (k === 'x' || k === 'X') { e.preventDefault(); setMuteCurrent(); return; }

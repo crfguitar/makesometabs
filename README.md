@@ -20,6 +20,7 @@ only ever changes that slot — nothing else on the sheet reflows or shifts.
 - Arrow keys move around. `Enter`/`Tab` moves to the next note slot, creating
   one if you're at the end. `|` inserts a barline after the selected slot.
 - `Ctrl+Z` / `Ctrl+Y` undo/redo.
+- Use the **Starter** menu for a blank tab or an original picking-pattern practice exercise.
 - Toolbar: add/remove note slots, barlines, and strings; switch tuning presets
   (or click a string label to rename it); save/load a project as JSON;
   export a plain-text `.txt` tab; print the sheet.
