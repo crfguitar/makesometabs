@@ -622,6 +622,11 @@ document.addEventListener('keydown', (e) => {
   if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement ||
       target.isContentEditable) return;
   const k = e.key;
+  if (k === ' ' || k === 'Spacebar') {
+    e.preventDefault();
+    if (isPlaying) stopPlayback(); else playTab();
+    return;
+  }
   if (k >= '0' && k <= '9') { e.preventDefault(); handleDigit(k); return; }
   if (k === 'x' || k === 'X') { e.preventDefault(); setMuteCurrent(); return; }
   if (k === 'Backspace' || k === 'Delete') {
